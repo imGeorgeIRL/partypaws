@@ -23,12 +23,16 @@ public class ScoreController : MonoBehaviour
 
     private IEnumerator WaitForLoad()
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1);
         LoadNextLevel();
     }
 
     private void LoadNextLevel()
     {
+        GameManager.isDistracting = false;
+        GameManager.distractionsUsed = 0;
+        GameManager.foodCollected = 0;
+        GameManager.distractCounter = 0;
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         int nextSceneIndex = (currentSceneIndex + 1) % SceneManager.sceneCountInBuildSettings;
 

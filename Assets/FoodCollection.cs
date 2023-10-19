@@ -21,7 +21,7 @@ public class FoodCollection : MonoBehaviour
     {
         if (collision.tag == "Player")
         {
-            GameManager.distractCounter++;
+            GameManager.foodCollected++;
             Destroy(gameObject);
         }
     }
