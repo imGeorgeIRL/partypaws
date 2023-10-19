@@ -11,6 +11,9 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 targetPosition;
     private bool isMoving;
 
+    public LayerMask obstacleLayer; // A layer mask to define which layers to consider as obstacles (Table, Human, etc.)
+    public float raycastDistance = 1.0f; // The distance to cast the ray
+
     void Update()
     {
         if (isMoving)
@@ -26,6 +29,15 @@ public class PlayerMovement : MonoBehaviour
 
             if (IsOneTileAway(cellPosition))
             {
+                if (GameManager.isDistracting)
+                {
+                    GameManager.distractCounter++; // Increment the distract counter
+                    if (GameManager.distractCounter >= 4)
+                    {
+                        GameManager.isDistracting = false; // Set isDistracting to false
+                        GameManager.distractCounter = 0; // Reset the counter
+                    }
+                }
                 // Smoothly move to the center of the cell
                 StartCoroutine(MoveToTarget(tilemap.GetCellCenterWorld(cellPosition)));
             }
@@ -53,12 +65,40 @@ public class PlayerMovement : MonoBehaviour
     bool IsOneTileAway(Vector3Int position)
     {
         Vector3Int currentCell = tilemap.WorldToCell(transform.position);
-        int deltaX = Mathf.Abs(position.x - currentCell.x);
-        int deltaY = Mathf.Abs(position.y - currentCell.y);
+        int deltaX = position.x - currentCell.x;
+        int deltaY = position.y - currentCell.y;
 
         // Ensure the target is within the grid and is exactly one tile away (not diagonal)
-        return IsPositionValid(position) && (deltaX == 1 || deltaY == 1) && deltaX + deltaY == 1;
+        if (IsPositionValid(position) && (Mathf.Abs(deltaX) + Mathf.Abs(deltaY) == 1))
+        {
+            // Check if there are obstacles in the target direction
+            if (deltaX < 0 && IsObstacleInDirection(transform.position, Vector2.left)) return false;
+            if (deltaX > 0 && IsObstacleInDirection(transform.position, Vector2.right)) return false;
+            if (deltaY < 0 && IsObstacleInDirection(transform.position, Vector2.down)) return false;
+            if (deltaY > 0 && IsObstacleInDirection(transform.position, Vector2.up)) return false;
+
+            return true; // No obstacles in the target direction, so allow the move
+        }
+
+        return false;
     }
+
+    bool IsObstacleInDirection(Vector3 position, Vector2 direction)
+{
+    Vector2 directionVector = direction.normalized;
+    RaycastHit2D hit = Physics2D.Raycast(position, directionVector, raycastDistance, obstacleLayer);
+
+    if (hit.collider != null)
+    {
+        if (hit.collider.CompareTag("Table") || hit.collider.CompareTag("Human"))
+        {
+            return true; // There's an obstacle (Table or Human) in this direction
+        }
+    }
+
+    return false; // No obstacle in this direction
+}
+
 
     bool IsPositionValid(Vector3Int position)
     {

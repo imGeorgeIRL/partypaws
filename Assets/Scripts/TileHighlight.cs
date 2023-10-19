@@ -1,17 +1,20 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class TileHighlight : MonoBehaviour
 {
     public Tilemap tilemap;
-    public Material highlightMaterial;
+    public GameObject adjacentHighlightPrefab; // Assign the adjacent highlight prefab
 
     private Vector3Int lastCellPosition;
+    private List<GameObject> adjacentHighlights = new List<GameObject>();
 
     private void Start()
     {
-        lastCellPosition = tilemap.WorldToCell(transform.position);
-        HighlightAdjacentCells(lastCellPosition);
+        Vector3Int startCellPosition = tilemap.WorldToCell(transform.position);
+        lastCellPosition = startCellPosition;
+        HighlightAdjacentTiles(startCellPosition);
     }
 
     private void Update()
@@ -20,33 +23,38 @@ public class TileHighlight : MonoBehaviour
 
         if (cellPosition != lastCellPosition)
         {
-            UnhighlightCells();
-            HighlightAdjacentCells(cellPosition);
+            UnhighlightAdjacentTiles();
+            HighlightAdjacentTiles(cellPosition);
             lastCellPosition = cellPosition;
         }
     }
 
-    void HighlightAdjacentCells(Vector3Int centerCell)
+    void HighlightAdjacentTiles(Vector3Int centerCell)
     {
-        HighlightCell(centerCell + new Vector3Int(1, 0, 0)); // Right
-        HighlightCell(centerCell + new Vector3Int(-1, 0, 0)); // Left
-        HighlightCell(centerCell + new Vector3Int(0, 1, 0)); // Up
-        HighlightCell(centerCell + new Vector3Int(0, -1, 0)); // Down
+        HighlightTile(centerCell + new Vector3Int(1, 0, 0)); // Right
+        HighlightTile(centerCell + new Vector3Int(-1, 0, 0)); // Left
+        HighlightTile(centerCell + new Vector3Int(0, 1, 0)); // Up
+        HighlightTile(centerCell + new Vector3Int(0, -1, 0)); // Down
     }
 
-    void HighlightCell(Vector3Int cellPosition)
+    void HighlightTile(Vector3Int cellPosition)
     {
-        tilemap.SetTileFlags(cellPosition, TileFlags.None);
-        tilemap.SetColor(cellPosition, Color.gray);
-    }
-
-    void UnhighlightCells()
-    {
-        BoundsInt bounds = tilemap.cellBounds;
-        foreach (var position in bounds.allPositionsWithin)
+        // Check if the tile is within the bounds of the Tilemap
+        if (tilemap.HasTile(cellPosition))
         {
-            tilemap.SetTileFlags(position, TileFlags.None);
-            tilemap.SetColor(position, Color.white);
+            Vector3 tilePosition = tilemap.GetCellCenterWorld(cellPosition);
+            GameObject adjacentHighlight = Instantiate(adjacentHighlightPrefab, tilePosition, Quaternion.identity);
+            adjacentHighlights.Add(adjacentHighlight);
         }
+    }
+
+    void UnhighlightAdjacentTiles()
+    {
+        foreach (var adjacentHighlight in adjacentHighlights)
+        {
+            Destroy(adjacentHighlight);
+        }
+
+        adjacentHighlights.Clear();
     }
 }
