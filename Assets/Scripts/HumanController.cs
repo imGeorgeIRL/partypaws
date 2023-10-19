@@ -8,6 +8,9 @@ public class HumanController : MonoBehaviour
     public Transform humanFull;
     public Transform rotationAnchor;
 
+    public float startingAngle;
+    public float rotatedAngle;
+
     private bool hasRotated = false;
 
     private BoxCollider2D bxCollider;
@@ -28,7 +31,7 @@ public class HumanController : MonoBehaviour
     public void RotateObject()
     {
         // Calculate the angle of rotation around the Z-axis.
-        float angleToRotate = -90.0f;
+        float angleToRotate = rotatedAngle;
 
         // Get the direction from the anchor to the object.
         Vector3 direction = humanFull.position - rotationAnchor.position;
@@ -43,7 +46,7 @@ public class HumanController : MonoBehaviour
     public void ResetObject()
     {
         // Calculate the angle of rotation around the Z-axis.
-        float angleToRotate = 0f;
+        float angleToRotate = startingAngle;
 
         // Get the direction from the anchor to the object.
         Vector3 direction = humanFull.position - rotationAnchor.position;
@@ -91,6 +94,10 @@ public class HumanController : MonoBehaviour
     {
         string currentSceneName = SceneManager.GetActiveScene().name;
         yield return new WaitForSeconds(0.5f);
+        GameManager.isDistracting = false;
+        GameManager.distractionsUsed = 0;
+        GameManager.foodCollected = 0;
+        GameManager.distractCounter = 0;
         SceneManager.LoadScene(currentSceneName);
     }
 }

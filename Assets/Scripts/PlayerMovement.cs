@@ -92,11 +92,12 @@ public class PlayerMovement : MonoBehaviour
     {
         if (hit.collider.CompareTag("Table") || hit.collider.CompareTag("Human"))
         {
-            return true; // There's an obstacle (Table or Human) in this direction
+                Debug.DrawRay(position, directionVector * raycastDistance, Color.red);
+                return true; // There's an obstacle (Table or Human) in this direction
         }
     }
-
-    return false; // No obstacle in this direction
+        Debug.DrawRay(position, directionVector * raycastDistance, Color.green);
+        return false; // No obstacle in this direction
 }
 
 

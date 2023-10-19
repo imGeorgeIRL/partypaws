@@ -105,7 +105,7 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 64
-  raycastDistance: 0.7
+  raycastDistance: 1
 --- !u!50 &7148102716305483595
 Rigidbody2D:
   serializedVersion: 4
